@@ -4,4 +4,3 @@ python-docx
 gunicorn
 sendgrid
 matplotlib
-docx2pdf

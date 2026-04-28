@@ -782,22 +782,6 @@ def make_civ(d, client_sig_path):
     return buf
 
 
-def docx_to_pdf(docx_buf, base_name):
-    """Convert a docx buffer to PDF using docx2pdf and return PDF bytes."""
-    from docx2pdf import convert
-    tmp_dir = tempfile.mkdtemp()
-    docx_path = os.path.join(tmp_dir, base_name + '.docx')
-    pdf_path = os.path.join(tmp_dir, base_name + '.pdf')
-    with open(docx_path, 'wb') as f:
-        f.write(docx_buf.read())
-    convert(docx_path, pdf_path)
-    with open(pdf_path, 'rb') as f:
-        pdf_bytes = f.read()
-    os.unlink(docx_path)
-    os.unlink(pdf_path)
-    os.rmdir(tmp_dir)
-    return pdf_bytes
-
 def send_email(d, aa_buf, civ_buf):
     lname = v(d,'lname')
     fname = v(d,'fname')
@@ -824,21 +808,15 @@ def send_email(d, aa_buf, civ_buf):
         plain_text_content=body
     )
 
-    # Convert to PDF and attach
-    print('Converting AA to PDF...')
-    aa_pdf = docx_to_pdf(aa_buf, 'AA_LAO_CIV_' + lname + '_' + fname)
-    print('Converting CIV to PDF...')
-    civ_pdf = docx_to_pdf(civ_buf, 'CIV_SOL_' + lname + '_' + fname)
-
-    for pdf_bytes, filename in [
-        (aa_pdf, 'AA_LAO_CIV_' + lname + '_' + fname + '.pdf'),
-        (civ_pdf, 'CIV_SOL_' + lname + '_' + fname + '.pdf'),
+    for buf, filename in [
+        (aa_buf, 'AA_LAO_CIV_' + lname + '_' + fname + '.docx'),
+        (civ_buf, 'CIV_SOL_' + lname + '_' + fname + '.docx'),
     ]:
-        encoded = base64.b64encode(pdf_bytes).decode()
+        encoded = base64.b64encode(buf.read()).decode()
         attachment = Attachment(
             FileContent(encoded),
             FileName(filename),
-            FileType('application/pdf'),
+            FileType('application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
             Disposition('attachment')
         )
         message.attachment = attachment
