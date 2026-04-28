@@ -6,7 +6,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-import os, io, base64, tempfile
+import os, io, base64, tempfile, subprocess
 from datetime import datetime
 import sendgrid
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
@@ -782,6 +782,31 @@ def make_civ(d, client_sig_path):
     return buf
 
 
+def docx_to_pdf(docx_buf, base_name):
+    """Convert a docx buffer to PDF using LibreOffice and return PDF bytes."""
+    tmp_dir = tempfile.mkdtemp()
+    docx_path = os.path.join(tmp_dir, base_name + '.docx')
+    pdf_path = os.path.join(tmp_dir, base_name + '.pdf')
+    # Write docx to temp file
+    with open(docx_path, 'wb') as f:
+        f.write(docx_buf.read())
+    # Convert using LibreOffice headless
+    result = subprocess.run([
+        'libreoffice', '--headless', '--convert-to', 'pdf',
+        '--outdir', tmp_dir, docx_path
+    ], capture_output=True, text=True, timeout=60)
+    print('LibreOffice stdout:', result.stdout)
+    print('LibreOffice stderr:', result.stderr)
+    if not os.path.exists(pdf_path):
+        raise Exception('PDF conversion failed: ' + result.stderr)
+    with open(pdf_path, 'rb') as f:
+        pdf_bytes = f.read()
+    # Cleanup
+    os.unlink(docx_path)
+    os.unlink(pdf_path)
+    os.rmdir(tmp_dir)
+    return pdf_bytes
+
 def send_email(d, aa_buf, civ_buf):
     lname = v(d,'lname')
     fname = v(d,'fname')
@@ -798,7 +823,7 @@ def send_email(d, aa_buf, civ_buf):
             'Evidence Provided: ' + v(d,'evidence') + '\n'
             'Date Signed: ' + v(d,'sigdate') + '\n'
             'Reference: ' + ref + '\n\n'
-            'Both completed declaration documents are attached.\n'
+            'Both completed declaration documents are attached as PDFs.\n'
             'Please countersign and submit to SLAB via Legal Aid Online.')
 
     message = Mail(
@@ -808,15 +833,21 @@ def send_email(d, aa_buf, civ_buf):
         plain_text_content=body
     )
 
-    for buf, filename in [
-        (aa_buf, 'AA_LAO_CIV_' + lname + '_' + fname + '.docx'),
-        (civ_buf, 'CIV_SOL_' + lname + '_' + fname + '.docx'),
+    # Convert to PDF and attach
+    print('Converting AA to PDF...')
+    aa_pdf = docx_to_pdf(aa_buf, 'AA_LAO_CIV_' + lname + '_' + fname)
+    print('Converting CIV to PDF...')
+    civ_pdf = docx_to_pdf(civ_buf, 'CIV_SOL_' + lname + '_' + fname)
+
+    for pdf_bytes, filename in [
+        (aa_pdf, 'AA_LAO_CIV_' + lname + '_' + fname + '.pdf'),
+        (civ_pdf, 'CIV_SOL_' + lname + '_' + fname + '.pdf'),
     ]:
-        encoded = base64.b64encode(buf.read()).decode()
+        encoded = base64.b64encode(pdf_bytes).decode()
         attachment = Attachment(
             FileContent(encoded),
             FileName(filename),
-            FileType('application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+            FileType('application/pdf'),
             Disposition('attachment')
         )
         message.attachment = attachment
