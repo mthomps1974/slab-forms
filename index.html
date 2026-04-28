@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thompson Family Law - Legal Aid Declaration</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#f5f3ee;color:#1a1a2e;font-size:15px;}
+header{background:#0d1b2a;padding:16px 24px;border-bottom:3px solid #c9a84c;display:flex;align-items:center;justify-content:space-between;}
+header h1{color:#fff;font-size:1.2rem;}
+header p{color:#e8d5a3;font-size:0.65rem;text-transform:uppercase;letter-spacing:.1em;}
+.prog{background:#1a3050;display:flex;max-width:680px;margin:0 auto;}
+.ps{flex:1;padding:10px 4px;text-align:center;font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:#3a5070;border-bottom:3px solid transparent;}
+.ps.active{color:#fff;border-bottom-color:#c9a84c;}
+.ps.done{color:#e8d5a3;border-bottom-color:#2d6a4f;}
+.main{max-width:680px;margin:0 auto;padding:20px 16px 60px;}
+.panel{display:none;}
+.panel.active{display:block;}
+.card{background:#fff;border:1px solid #d4c9b0;padding:22px;margin-bottom:8px;}
+h2{font-size:1.3rem;color:#0d1b2a;margin-bottom:4px;font-family:Georgia,serif;font-weight:normal;}
+.sub{font-size:.75rem;color:#888;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #eee;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.full{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:#333;font-weight:bold;}
+.fg input,.fg textarea,.fg select{border:1px solid #ccc;padding:8px 10px;font-size:.85rem;background:#faf8f4;outline:none;width:100%;}
+.fg input:focus,.fg textarea:focus{border-color:#0d1b2a;background:#fff;}
+.fg textarea{min-height:60px;resize:vertical;}
+.rrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ri{display:flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid #ccc;cursor:pointer;font-size:.78rem;background:#faf8f4;}
+.ri:hover{border-color:#0d1b2a;}
+.cgrid{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:10px;}
+.ci{display:flex;align-items:flex-start;gap:6px;padding:5px 8px;border:1px solid #ccc;cursor:pointer;font-size:.75rem;line-height:1.4;background:#faf8f4;}
+.ci:hover{border-color:#0d1b2a;}
+.ci input{margin-top:2px;flex-shrink:0;}
+.tbl{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:.8rem;}
+.tbl th{background:#0d1b2a;color:#e8d5a3;padding:6px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;}
+.tbl td{padding:5px 8px;border-bottom:1px solid #ddd;}
+.tbl tr:nth-child(even) td{background:#f5f3ee;}
+.tbl td input{border:1px solid #ccc;padding:3px 6px;font-size:.78rem;background:#fff;outline:none;width:100%;}
+.tbl td input[type=checkbox]{width:16px;height:16px;}
+.div{height:1px;background:#eee;margin:16px 0;}
+.sh{font-size:.95rem;color:#0d1b2a;font-weight:bold;margin-bottom:8px;border-bottom:2px solid #c9a84c;padding-bottom:4px;}
+.cond{display:none;background:#f0ebe0;border-left:3px solid #c9a84c;padding:10px 12px;margin:4px 0 8px;}
+.cond.show{display:block;}
+.sigbox{border:1px solid #ccc;background:#fff;padding:8px 12px 4px;margin-bottom:5px;}
+.sig-input{width:100%;border:none;outline:none;font-family:Georgia,serif;font-style:italic;font-size:2rem;color:#0d1b2a;background:transparent;border-bottom:1px solid #bbb;padding:2px 0 4px;}
+.sig-input::placeholder{font-family:Arial,sans-serif;font-style:normal;font-size:.75rem;color:#bbb;}
+.sigok{font-size:.65rem;color:#2d6a4f;display:none;margin-top:3px;}
+.sigok.show{display:block;}
+.nav{display:flex;justify-content:space-between;margin-top:20px;padding-top:14px;border-top:1px solid #eee;}
+.btnb{padding:9px 18px;border:1px solid #ccc;background:#fff;color:#888;font-size:.72rem;text-transform:uppercase;cursor:pointer;}
+.btnf{padding:9px 22px;background:#0d1b2a;border:none;color:#fff;font-size:.72rem;text-transform:uppercase;cursor:pointer;}
+.btns{padding:16px;background:#c9a84c;border:none;color:#0d1b2a;font-size:1rem;text-transform:uppercase;cursor:pointer;font-weight:bold;width:100%;margin:14px 0 6px;letter-spacing:.08em;}
+.btns:hover{background:#b8923e;}
+.btns:disabled{background:#ccc;cursor:not-allowed;}
+.err{background:#fde8e8;border:1px solid #c0392b;padding:9px 12px;font-size:.78rem;color:#c0392b;margin:8px 0;display:none;}
+.success{text-align:center;background:#fff;border:1px solid #d4c9b0;padding:36px 24px;display:none;}
+.success.show{display:block;}
+.tick{width:50px;height:50px;background:#2d6a4f;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.4rem;color:#fff;}
+.success h2{font-size:1.4rem;color:#0d1b2a;margin-bottom:8px;}
+.success p{font-size:.8rem;color:#666;max-width:380px;margin:0 auto;line-height:1.7;}
+.ref{background:#f0ebe0;border:1px solid #ccc;display:inline-block;padding:6px 16px;margin:10px 0;font-size:.85rem;letter-spacing:.1em;color:#0d1b2a;font-weight:bold;}
+footer{background:#0d1b2a;border-top:3px solid #c9a84c;padding:14px;text-align:center;margin-top:30px;}
+footer p{font-size:.62rem;color:#3a5070;line-height:1.9;}
+footer a{color:#c9a84c;text-decoration:none;}
+@media(max-width:540px){.row{grid-template-columns:1fr;}.cgrid{grid-template-columns:1fr;}.main{padding:12px 10px 50px;}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Thompson Family Law</h1>
+    <p>Solicitors and Legal Aid Providers</p>
+  </div>
+  <span style="font-size:.6rem;color:#c9a84c;border:1px solid #c9a84c;padding:4px 10px;letter-spacing:.1em;text-transform:uppercase;">Secure Form</span>
+</header>
+<div style="background:#1a3050;">
+<div class="prog" id="prog">
+  <div class="ps active" id="ps1">Details</div>
+  <div class="ps" id="ps2">Equality</div>
+  <div class="ps" id="ps3">Financial</div>
+  <div class="ps" id="ps4">Income</div>
+  <div class="ps" id="ps5">Sign and Submit</div>
+</div>
+</div>
+<div class="main">
+
+<div class="panel active" id="p1">
+<div class="card">
+  <h2>Your Details</h2>
+  <div class="sub">Fields marked * are required.</div>
+  <div class="row full"><div class="fg"><label>Type of Case *</label><input type="text" id="f-subject" placeholder="e.g. Contact Order, Divorce"></div></div>
+  <div class="row">
+    <div class="fg"><label>Forename *</label><input type="text" id="f-fname" placeholder="First name"></div>
+    <div class="fg"><label>Surname *</label><input type="text" id="f-lname" placeholder="Last name"></div>
+  </div>
+  <div class="row">
+    <div class="fg"><label>Date of Birth *</label><input type="date" id="f-dob"></div>
+    <div class="fg"><label>National Insurance Number</label><input type="text" id="f-ni" placeholder="AB 12 34 56 C"></div>
+  </div>
+  <div class="row full"><div class="fg"><label>If no NI number - reason (a child / asylum seeker / other)</label><input type="text" id="f-ni-reason" placeholder="Leave blank if NI number provided above"></div></div>
+  <div class="row">
+    <div class="fg"><label>Telephone *</label><input type="tel" id="f-tel" placeholder="07700 000000"></div>
+    <div class="fg"><label>Email *</label><input type="email" id="f-email" placeholder="your@email.com"></div>
+  </div>
+  <div class="row full"><div class="fg"><label>Home Address *</label><textarea id="f-haddr" placeholder="Street, Town, City"></textarea></div></div>
+  <div class="row">
+    <div class="fg"><label>Postcode *</label><input type="text" id="f-hpc" placeholder="AB21 9RN"></div>
+  </div>
+  <div class="row full"><div class="fg"><label>Correspondence Address (if different from home)</label><textarea id="f-caddr" placeholder="Leave blank if same as home address"></textarea></div></div>
+  <div class="row">
+    <div class="fg"><label>Correspondence Postcode</label><input type="text" id="f-cpc" placeholder=""></div>
+    <div class="fg"><label>Contact by Email?</label>
+      <div class="rrow" style="margin-top:4px">
+        <label class="ri"><input type="radio" name="cemail" value="Yes"> Yes</label>
+        <label class="ri"><input type="radio" name="cemail" value="No" checked> No</label>
+      </div>
+    </div>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Previous Solicitor on this Matter?</div>
+  <div class="rrow">
+    <label class="ri"><input type="radio" name="prevsol" value="Yes" id="r-ps-yes"> Yes</label>
+    <label class="ri"><input type="radio" name="prevsol" value="No" checked> No</label>
+  </div>
+  <div class="cond" id="cond-ps"><div class="fg"><label>Details</label><textarea id="f-prevsol" placeholder="Solicitor name, dates, nature of advice"></textarea></div></div>
+  <div class="div"></div>
+  <div class="sh">Communication Support Needs</div>
+  <div class="cgrid" id="comm-grid" style="grid-template-columns:1fr;">
+    <label class="ci"><input type="checkbox" value="None/no support needed" checked> None / no support needed</label>
+    <label class="ci"><input type="checkbox" value="Audio"> Audio</label>
+    <label class="ci"><input type="checkbox" value="Spoken language translation or interpreter"> Spoken language translation or interpreter</label>
+    <label class="ci"><input type="checkbox" value="Large print"> Large print</label>
+    <label class="ci"><input type="checkbox" value="British Sign Language (BSL)"> British Sign Language (BSL)</label>
+    <label class="ci"><input type="checkbox" value="Braille"> Braille</label>
+    <label class="ci"><input type="checkbox" value="Other"> Other</label>
+  </div>
+  <div class="row full"><div class="fg"><label>Communication support details (if other)</label><input type="text" id="f-comm-detail" placeholder="Language needed, font size, or other details"></div></div>
+  <div class="nav"><span></span><button class="btnf" id="p1next">Next: Equality &gt;</button></div>
+</div>
+</div>
+
+<div class="panel" id="p2">
+<div class="card">
+  <h2>Equality Information</h2>
+  <div class="sub">Collected by SLAB to monitor equality of access.</div>
+  <div class="sh">Sex</div>
+  <div class="rrow">
+    <label class="ri"><input type="radio" name="sex" value="Female"> Female</label>
+    <label class="ri"><input type="radio" name="sex" value="Male"> Male</label>
+    <label class="ri"><input type="radio" name="sex" value="Prefer not to say"> Prefer not to say</label>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Disability (lasting 12+ months)</div>
+  <div class="cgrid" id="disab-grid" style="grid-template-columns:1fr;">
+    <label class="ci"><input type="checkbox" value="Deafness or partial hearing loss"> Deafness or partial hearing loss</label>
+    <label class="ci"><input type="checkbox" value="Blindness or partial sight loss"> Blindness or partial sight loss</label>
+    <label class="ci"><input type="checkbox" value="Full or partial loss of voice"> Full or partial loss of voice</label>
+    <label class="ci"><input type="checkbox" value="Learning disability"> Learning disability</label>
+    <label class="ci"><input type="checkbox" value="Learning difficulty"> Learning difficulty</label>
+    <label class="ci"><input type="checkbox" value="Development disorder"> Development disorder</label>
+    <label class="ci"><input type="checkbox" value="Physical disability"> Physical disability</label>
+    <label class="ci"><input type="checkbox" value="Mental health condition"> Mental health condition</label>
+    <label class="ci"><input type="checkbox" value="Long-term illness or condition"> Long-term illness or condition</label>
+    <label class="ci"><input type="checkbox" value="No known conditions"> No known conditions</label>
+    <label class="ci"><input type="checkbox" value="Prefer not to say"> Prefer not to say</label>
+  </div>
+  <div class="div"></div>
+  <div class="sh">National Identity</div>
+  <div class="cgrid" id="natid-grid" style="grid-template-columns:1fr;">
+    <label class="ci"><input type="checkbox" value="Scottish"> Scottish</label>
+    <label class="ci"><input type="checkbox" value="English"> English</label>
+    <label class="ci"><input type="checkbox" value="Northern Irish"> Northern Irish</label>
+    <label class="ci"><input type="checkbox" value="Welsh"> Welsh</label>
+    <label class="ci"><input type="checkbox" value="British"> British</label>
+    <label class="ci"><input type="checkbox" value="Prefer not to say"> Prefer not to say</label>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Ethnic Group</div>
+  <div class="cgrid" id="eth-grid" style="grid-template-columns:1fr;">
+    <label class="ci"><input type="checkbox" value="White Scottish"> White Scottish</label>
+    <label class="ci"><input type="checkbox" value="White Other British"> White Other British</label>
+    <label class="ci"><input type="checkbox" value="White Irish"> White Irish</label>
+    <label class="ci"><input type="checkbox" value="White Polish"> White Polish</label>
+    <label class="ci"><input type="checkbox" value="Pakistani or Scottish Pakistani"> Pakistani or Scottish Pakistani</label>
+    <label class="ci"><input type="checkbox" value="Indian or Scottish Indian"> Indian or Scottish Indian</label>
+    <label class="ci"><input type="checkbox" value="Bangladeshi"> Bangladeshi</label>
+    <label class="ci"><input type="checkbox" value="Chinese or Scottish Chinese"> Chinese or Scottish Chinese</label>
+    <label class="ci"><input type="checkbox" value="African or Scottish African"> African or Scottish African</label>
+    <label class="ci"><input type="checkbox" value="Caribbean or Black Scottish"> Caribbean or Black Scottish</label>
+    <label class="ci"><input type="checkbox" value="Mixed or multiple ethnic groups"> Mixed or multiple</label>
+    <label class="ci"><input type="checkbox" value="Arab or Scottish Arab"> Arab or Scottish Arab</label>
+    <label class="ci"><input type="checkbox" value="Prefer not to say"> Prefer not to say</label>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Care Experience</div>
+  <div class="rrow">
+    <label class="ri"><input type="radio" name="care" value="Currently looked after by Local Authority"> Currently looked after</label>
+    <label class="ri"><input type="radio" name="care" value="Previously looked after by Local Authority"> Previously looked after</label>
+    <label class="ri"><input type="radio" name="care" value="Never been looked after by Local Authority" checked> Never looked after</label>
+    <label class="ri"><input type="radio" name="care" value="Prefer not to say"> Prefer not to say</label>
+  </div>
+  <div class="nav">
+    <button class="btnb" id="p2back">&lt; Back</button>
+    <button class="btnf" id="p2next">Next: Financial &gt;</button>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="p3">
+<div class="card">
+  <h2>Financial Details</h2>
+  <div class="sub">Used to assess eligibility for legal aid.</div>
+  <div class="sh">Other Assistance with Legal Costs?</div>
+  <div class="rrow">
+    <label class="ri"><input type="radio" name="otherassist" value="Yes" id="r-oa-yes"> Yes</label>
+    <label class="ri"><input type="radio" name="otherassist" value="No" checked> No</label>
+  </div>
+  <div class="cond" id="cond-oa"><div class="fg"><label>Why this cannot be used</label><textarea id="f-oa-why" placeholder="Reason"></textarea></div></div>
+  <div class="div"></div>
+  <div class="sh">Spouse or Partner?</div>
+  <div class="rrow">
+    <label class="ri"><input type="radio" name="partner" value="Yes" id="r-p-yes"> Yes</label>
+    <label class="ri"><input type="radio" name="partner" value="No" checked> No</label>
+  </div>
+  <div class="cond" id="cond-p">
+    <div class="row">
+      <div class="fg"><label>Partner Forename</label><input type="text" id="f-pfname"></div>
+      <div class="fg"><label>Partner Surname</label><input type="text" id="f-plname"></div>
+    </div>
+    <div class="row">
+      <div class="fg"><label>Partner Date of Birth</label><input type="date" id="f-pdob"></div>
+      <div class="fg"><label>Partner NI Number</label><input type="text" id="f-pni"></div>
+    </div>
+    <div class="sh">Contrary interest in this matter?</div>
+    <div class="rrow">
+      <label class="ri"><input type="radio" name="contrary" value="Yes"> Yes</label>
+      <label class="ri"><input type="radio" name="contrary" value="No" checked> No</label>
+    </div>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Passported Benefits</div>
+  <table class="tbl">
+    <thead><tr><th>Benefit</th><th style="width:70px;text-align:center">Client</th><th style="width:70px;text-align:center">Partner</th></tr></thead>
+    <tbody>
+      <tr><td>Income Support</td><td style="text-align:center"><input type="checkbox" id="pb-is-c"></td><td style="text-align:center"><input type="checkbox" id="pb-is-p"></td></tr>
+      <tr><td>Income-based JSA</td><td style="text-align:center"><input type="checkbox" id="pb-jsa-c"></td><td style="text-align:center"><input type="checkbox" id="pb-jsa-p"></td></tr>
+      <tr><td>Income-related ESA</td><td style="text-align:center"><input type="checkbox" id="pb-esa-c"></td><td style="text-align:center"><input type="checkbox" id="pb-esa-p"></td></tr>
+      <tr><td>Universal Credit</td><td style="text-align:center"><input type="checkbox" id="pb-uc-c"></td><td style="text-align:center"><input type="checkbox" id="pb-uc-p"></td></tr>
+    </tbody>
+  </table>
+  <div class="div"></div>
+  <div class="sh">Dependants</div>
+  <div class="row">
+    <div class="fg"><label>Living with client (excl. partner)</label><input type="number" id="f-dep1" min="0" value="0"></div>
+    <div class="fg"><label>Not living with client</label><input type="number" id="f-dep2" min="0" value="0"></div>
+  </div>
+  <div class="row">
+    <div class="fg"><label>Partner dependants living with client</label><input type="number" id="f-dep3" min="0" value="0"></div>
+    <div class="fg"><label>Partner dependants not living with client</label><input type="number" id="f-dep4" min="0" value="0"></div>
+  </div>
+  <div class="div"></div>
+  <div class="sh">Other Income</div>
+  <table class="tbl">
+    <thead><tr><th>Source of other income</th><th>How much?</th><th>How often?</th></tr></thead>
+    <tbody>
+      <tr><td><input type="text" id="oi1-src" placeholder="e.g. maintenance payments"></td><td><input type="number" id="oi1-amt" placeholder="0.00"></td><td><input type="text" id="oi1-freq" placeholder="e.g. weekly"></td></tr>
+      <tr><td><input type="text" id="oi2-src" placeholder=""></td><td><input type="number" id="oi2-amt" placeholder="0.00"></td><td><input type="text" id="oi2-freq" placeholder=""></td></tr>
+    </tbody>
+  </table>
+  <div class="nav">
+    <button class="btnb" id="p3back">&lt; Back</button>
+    <button class="btnf" id="p3next">Next: Income &gt;</button>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="p4">
+<div class="card">
+  <h2>Income and Capital</h2>
+  <div class="sub">Please provide current figures.</div>
+  <div class="sh">Bank Accounts</div>
+  <table class="tbl">
+    <thead><tr><th>Bank</th><th>Last 4 digits</th><th>Type</th><th>Balance</th></tr></thead>
+    <tbody>
+      <tr><td><input type="text" id="ba1n" placeholder="e.g. TSB"></td><td><input type="text" id="ba1num" placeholder="9868"></td><td><input type="text" id="ba1t" placeholder="Current"></td><td><input type="number" id="ba1b" placeholder="0.00"></td></tr>
+      <tr><td><input type="text" id="ba2n" placeholder="e.g. RBS"></td><td><input type="text" id="ba2num" placeholder=""></td><td><input type="text" id="ba2t" placeholder=""></td><td><input type="number" id="ba2b" placeholder="0.00"></td></tr>
+      <tr><td><input type="text" id="ba3n" placeholder=""></td><td><input type="text" id="ba3num" placeholder=""></td><td><input type="text" id="ba3t" placeholder=""></td><td><input type="number" id="ba3b" placeholder="0.00"></td></tr>
+    </tbody>
+  </table>
+  <div class="div"></div>
+  <div class="sh">Capital Assets</div>
+  <table class="tbl">
+    <thead><tr><th>Asset</th><th>Client</th><th>Partner</th></tr></thead>
+    <tbody>
+      <tr><td>Cash</td><td><input type="number" id="cap-cc" placeholder="0.00"></td><td><input type="number" id="cap-cp" placeholder="0.00"></td></tr>
+      <tr><td>Other property (not main home)</td><td><input type="number" id="cap-pc" placeholder="0.00"></td><td><input type="number" id="cap-pp" placeholder="0.00"></td></tr>
+      <tr><td>Investments</td><td><input type="number" id="cap-ic" placeholder="0.00"></td><td><input type="number" id="cap-ip" placeholder="0.00"></td></tr>
+      <tr><td>Other capital (boat, caravan, jewellery etc)</td><td><input type="number" id="cap-oc" placeholder="0.00"></td><td><input type="number" id="cap-op" placeholder="0.00"></td></tr>
+      <tr><td>Outstanding mortgage on other property</td><td><input type="number" id="cap-mc" placeholder="0.00"></td><td><input type="number" id="cap-mp" placeholder="0.00"></td></tr>
+    </tbody>
+  </table>
+  <div class="row full"><div class="fg"><label>Address of other property owned (if any)</label><input type="text" id="f-prop-addr" placeholder="Address of other property client or partner owns"></div></div>
+  <div class="div"></div>
+  <div class="sh">Non-Passport Benefits</div>
+  <div class="cgrid" id="nonpass-grid" style="grid-template-columns:1fr;">
+    <label class="ci"><input type="checkbox" value="Child Benefit"> Child Benefit</label>
+    <label class="ci"><input type="checkbox" value="Child Tax Credit"> Child Tax Credit</label>
+    <label class="ci"><input type="checkbox" value="Working Tax Credit"> Working Tax Credit</label>
+    <label class="ci"><input type="checkbox" value="PIP"> PIP</label>
+    <label class="ci"><input type="checkbox" value="DLA"> DLA</label>
+    <label class="ci"><input type="checkbox" value="Incapacity Benefit"> Incapacity Benefit</label>
+  </div>
+  <div class="row">
+    <div class="fg"><label>Pay or sick pay (weekly net)</label><input type="number" id="earn-pay" placeholder="0.00"></div>
+    <div class="fg"><label>Self-employed weekly drawings</label><input type="number" id="earn-se" placeholder="0.00"></div>
+  </div>
+  <div class="row full"><div class="fg"><label>Employer name and address (client)</label><input type="text" id="f-employer-c" placeholder="Name and full address of employer or self-employed business"></div></div>
+  <div class="row full"><div class="fg"><label>Employer name and address (partner, if applicable)</label><input type="text" id="f-employer-p" placeholder="Name and full address of partner employer"></div></div>
+  <div class="row full"><div class="fg"><label>If no income - how is client supported financially?</label><input type="text" id="f-no-income" placeholder="e.g. supported by family, savings"></div></div>
+  <div class="row full"><div class="fg"><label>Documentary evidence provided</label><input type="text" id="f-evidence" placeholder="e.g. Universal Credit letter, bank statement"></div></div>
+  <div class="nav">
+    <button class="btnb" id="p4back">&lt; Back</button>
+    <button class="btnf" id="p4next">Next: Sign and Submit &gt;</button>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="p5">
+<div class="card">
+  <h2>Sign and Submit</h2>
+  <div class="sub">Type your full name to sign then click the button to send your completed forms to Thompson Family Law.</div>
+  <div class="fg" style="margin-bottom:14px">
+    <label>Your Signature - sign below using your mouse or finger *</label>
+    <div style="border:1px solid #ccc;background:#fff;position:relative;">
+      <canvas id="sigCanvas" width="600" height="120" style="width:100%;height:120px;display:block;cursor:crosshair;touch-action:none;"></canvas>
+      <div style="position:absolute;bottom:4px;right:8px;font-size:.65rem;color:#bbb;">Sign here</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button type="button" onclick="clearSig()" style="padding:4px 12px;font-size:.7rem;border:1px solid #ccc;background:#fff;cursor:pointer;">Clear</button>
+      <div class="sigok" id="sigOk" style="display:none;line-height:2;">Signature captured</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="fg"><label>Date *</label><input type="date" id="f-sigdate"></div>
+  </div>
+  <div id="partner-sig-section" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid #eee;">
+    <div class="sh">Partner Signature</div>
+    <div class="cs" style="margin-bottom:10px;">The partner must also sign below.</div>
+    <div class="fg" style="margin-bottom:14px">
+      <label>Partner Signature - sign below using mouse or finger *</label>
+      <div style="border:1px solid #ccc;background:#fff;position:relative;">
+        <canvas id="partnerSigCanvas" width="600" height="120" style="width:100%;height:120px;display:block;cursor:crosshair;touch-action:none;"></canvas>
+        <div style="position:absolute;bottom:4px;right:8px;font-size:.65rem;color:#bbb;">Partner signs here</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button type="button" onclick="clearPartnerSig()" style="padding:4px 12px;font-size:.7rem;border:1px solid #ccc;background:#fff;cursor:pointer;">Clear</button>
+        <div id="partnerSigOk" style="display:none;font-size:.68rem;color:#2d6a4f;line-height:2;">Partner signature captured</div>
+      </div>
+    </div>
+  </div>
+  <div class="err" id="errBanner"></div>
+  <button class="btns" id="submitBtn">Generate and Submit Declarations</button>
+  <div class="nav" style="border-top:none;padding-top:0;margin-top:0">
+    <button class="btnb" id="p5back">&lt; Back</button>
+    <span></span>
+  </div>
+</div>
+</div>
+
+<div class="success" id="successScreen">
+  <div class="tick">&#10003;</div>
+  <h2>Declarations Submitted</h2>
+  <p>Your completed declarations have been emailed to Thompson Family Law. Your reference number is below.</p>
+  <div class="ref" id="refNum">TFL-000000</div>
+  <p style="font-size:.72rem;color:#888;margin-top:14px">Questions? Call 0141 404 6575 Glasgow or 0131 358 4231 Edinburgh</p>
+</div>
+
+</div>
+<footer>
+  <p>Thompson Family Law Solicitors - Registered with the Scottish Legal Aid Board<br>
+  <a href="tel:01414046575">0141 404 6575</a> Glasgow -
+  <a href="tel:01313584231">0131 358 4231</a> Edinburgh</p>
+</footer>
+
+<script>
+var cp = 1;
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function gr(n){var e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'';}
+function gcb(gid){var g=document.getElementById(gid);if(!g)return 'None';var v=[];g.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){v.push(c.value);});return v.length?v.join(', '):'None';}
+function sp(n){document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});document.getElementById('p'+n).classList.add('active');cp=n;for(var s=1;s<=5;s++){var el=document.getElementById('ps'+s);el.classList.remove('active','done');if(s<n)el.classList.add('done');if(s===n)el.classList.add('active');}window.scrollTo(0,0);}
+function vp1(){var req=['f-subject','f-fname','f-lname','f-dob','f-tel','f-email','f-haddr','f-hpc'];var ok=true;req.forEach(function(id){var e=document.getElementById(id);if(e&&!e.value.trim()){e.style.borderColor='#c0392b';ok=false;}else if(e){e.style.borderColor='';}});return ok;}
+document.getElementById('p1next').addEventListener('click',function(){if(vp1())sp(2);else window.scrollTo(0,0);});
+document.getElementById('p2back').addEventListener('click',function(){sp(1);});
+document.getElementById('p2next').addEventListener('click',function(){sp(3);});
+document.getElementById('p3back').addEventListener('click',function(){sp(2);});
+document.getElementById('p3next').addEventListener('click',function(){sp(4);});
+document.getElementById('p4back').addEventListener('click',function(){sp(3);});
+document.getElementById('p4next').addEventListener('click',function(){sp(5);});
+document.getElementById('p5back').addEventListener('click',function(){sp(4);});
+document.getElementById('r-ps-yes').addEventListener('change',function(){document.getElementById('cond-ps').classList.add('show');});
+document.querySelectorAll('input[name=prevsol]').forEach(function(r){if(r.value==='No')r.addEventListener('change',function(){document.getElementById('cond-ps').classList.remove('show');});});
+document.getElementById('r-oa-yes').addEventListener('change',function(){document.getElementById('cond-oa').classList.add('show');});
+document.querySelectorAll('input[name=otherassist]').forEach(function(r){if(r.value==='No')r.addEventListener('change',function(){document.getElementById('cond-oa').classList.remove('show');});});
+document.getElementById('r-p-yes').addEventListener('change',function(){
+  document.getElementById('cond-p').classList.add('show');
+  document.getElementById('partner-sig-section').style.display='block';
+  initPartnerSigPad();
+});
+document.querySelectorAll('input[name=partner]').forEach(function(r){if(r.value==='No')r.addEventListener('change',function(){
+  document.getElementById('cond-p').classList.remove('show');
+  document.getElementById('partner-sig-section').style.display='none';
+});});
+
+document.getElementById('submitBtn').addEventListener('click',function(){
+  var sig=getSigDataURL();var date=gv('f-sigdate');var banner=document.getElementById('errBanner');
+  if(!sig){banner.textContent='Please sign in the signature box above.';banner.style.display='block';return;}
+  if(!date){banner.textContent='Please enter the date.';banner.style.display='block';return;}
+  banner.style.display='none';
+  var btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Sending...';
+  var pbc=[];var pbp=[];
+  if(document.getElementById('pb-is-c').checked)pbc.push('Income Support');
+  if(document.getElementById('pb-jsa-c').checked)pbc.push('Income-based JSA');
+  if(document.getElementById('pb-esa-c').checked)pbc.push('Income-related ESA');
+  if(document.getElementById('pb-uc-c').checked)pbc.push('Universal Credit');
+  if(document.getElementById('pb-is-p').checked)pbp.push('Income Support');
+  if(document.getElementById('pb-jsa-p').checked)pbp.push('Income-based JSA');
+  if(document.getElementById('pb-esa-p').checked)pbp.push('Income-related ESA');
+  if(document.getElementById('pb-uc-p').checked)pbp.push('Universal Credit');
+  var d={subject:gv('f-subject'),fname:gv('f-fname'),ni_reason:gv('f-ni-reason'),lname:gv('f-lname'),dob:gv('f-dob'),ni:gv('f-ni'),tel:gv('f-tel'),email:gv('f-email'),cemail:gr('cemail'),haddr:gv('f-haddr'),hpc:gv('f-hpc'),caddr:gv('f-caddr'),cpc:gv('f-cpc'),comm:gcb('comm-grid')+(gv('f-comm-detail')?(' - '+gv('f-comm-detail')):''),prevsol:gr('prevsol'),prevsol_det:gv('f-prevsol'),sex:gr('sex'),care:gr('care'),disabilities:gcb('disab-grid'),natid:gcb('natid-grid'),ethnic:gcb('eth-grid'),otherassist:gr('otherassist'),oa_why:gv('f-oa-why'),partner:gr('partner'),pfname:gv('f-pfname'),plname:gv('f-plname'),pdob:gv('f-pdob'),pni:gv('f-pni'),contrary:gr('contrary'),dep1:gv('f-dep1'),dep2:gv('f-dep2'),dep3:gv('f-dep3'),dep4:gv('f-dep4'),oi1_src:gv('oi1-src'),oi1_amt:gv('oi1-amt'),oi1_freq:gv('oi1-freq'),oi2_src:gv('oi2-src'),oi2_amt:gv('oi2-amt'),oi2_freq:gv('oi2-freq'),pass_c:pbc.join(', ')||'None',pass_p:pbp.join(', ')||'None',ba1n:gv('ba1n'),ba1num:gv('ba1num'),ba1t:gv('ba1t'),ba1b:gv('ba1b'),ba2n:gv('ba2n'),ba2num:gv('ba2num'),ba2t:gv('ba2t'),ba2b:gv('ba2b'),ba3n:gv('ba3n'),ba3num:gv('ba3num'),ba3t:gv('ba3t'),ba3b:gv('ba3b'),cap_cc:gv('cap-cc'),cap_cp:gv('cap-cp'),cap_pc:gv('cap-pc'),cap_pp:gv('cap-pp'),cap_ic:gv('cap-ic'),cap_ip:gv('cap-ip'),cap_oc:gv('cap-oc'),cap_op:gv('cap-op'),cap_mc:gv('cap-mc'),cap_mp:gv('cap-mp'),prop_addr:gv('f-prop-addr'),nonpass:gcb('nonpass-grid'),earn_pay:gv('earn-pay'),earn_se:gv('earn-se'),employer_c:gv('f-employer-c'),employer_p:gv('f-employer-p'),no_income:gv('f-no-income'),evidence:gv('f-evidence'),signame:'[signature on file]',sigDataURL:sig,partnerSigDataURL:getPartnerSigDataURL(),sigdate:date};
+  fetch('https://slab-forms.onrender.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(data.ok){document.getElementById('refNum').textContent=data.ref;document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});document.getElementById('prog').style.display='none';document.getElementById('successScreen').classList.add('show');window.scrollTo(0,0);}
+    else{btn.disabled=false;btn.textContent='Generate and Submit Declarations';banner.textContent='Error: '+(data.error||'Please try again');banner.style.display='block';}
+  })
+  .catch(function(){btn.disabled=false;btn.textContent='Generate and Submit Declarations';banner.textContent='Connection error - please try again';banner.style.display='block';});
+});
+window.addEventListener('load',function(){
+  var t=new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(function(f){if(!f.value)f.value=t;});
+  initSigPad();
+});
+
+function initSigPad(){
+  var canvas=document.getElementById('sigCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var drawing=false;
+  var hasSig=false;
+  ctx.strokeStyle='#0d1b2a';
+  ctx.lineWidth=2.5;
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+
+  function getPos(e){
+    var rect=canvas.getBoundingClientRect();
+    var scaleX=canvas.width/rect.width;
+    var scaleY=canvas.height/rect.height;
+    if(e.touches){
+      return{x:(e.touches[0].clientX-rect.left)*scaleX,y:(e.touches[0].clientY-rect.top)*scaleY};
+    }
+    return{x:(e.clientX-rect.left)*scaleX,y:(e.clientY-rect.top)*scaleY};
+  }
+
+  function start(e){e.preventDefault();drawing=true;var p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
+  function move(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true;document.getElementById('sigOk').style.display='block';}
+  function stop(e){e.preventDefault();drawing=false;}
+
+  canvas.addEventListener('mousedown',start);
+  canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',stop);
+  canvas.addEventListener('mouseleave',stop);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',stop,{passive:false});
+}
+
+function clearSig(){
+  var canvas=document.getElementById('sigCanvas');
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('sigOk').style.display='none';
+}
+
+function initPartnerSigPad(){
+  var canvas=document.getElementById('partnerSigCanvas');
+  if(!canvas||canvas.dataset.init)return;
+  canvas.dataset.init='1';
+  var ctx=canvas.getContext('2d');
+  var drawing=false;
+  ctx.strokeStyle='#0d1b2a';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  function getPos(e){var rect=canvas.getBoundingClientRect();var scaleX=canvas.width/rect.width;var scaleY=canvas.height/rect.height;if(e.touches){return{x:(e.touches[0].clientX-rect.left)*scaleX,y:(e.touches[0].clientY-rect.top)*scaleY};}return{x:(e.clientX-rect.left)*scaleX,y:(e.clientY-rect.top)*scaleY};}
+  function start(e){e.preventDefault();drawing=true;var p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
+  function move(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();document.getElementById('partnerSigOk').style.display='block';}
+  function stop(e){e.preventDefault();drawing=false;}
+  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);canvas.addEventListener('mouseup',stop);canvas.addEventListener('mouseleave',stop);
+  canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',stop,{passive:false});
+}
+
+function clearPartnerSig(){
+  var canvas=document.getElementById('partnerSigCanvas');
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('partnerSigOk').style.display='none';
+}
+
+function getPartnerSigDataURL(){
+  var canvas=document.getElementById('partnerSigCanvas');
+  if(!canvas)return null;
+  var ctx=canvas.getContext('2d');
+  var pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  var hasContent=false;
+  for(var i=3;i<pixels.length;i+=4){if(pixels[i]>0){hasContent=true;break;}}
+  if(!hasContent)return null;
+  return canvas.toDataURL('image/png');
+}
+
+function getSigDataURL(){
+  var canvas=document.getElementById('sigCanvas');
+  var ctx=canvas.getContext('2d');
+  var pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  var hasContent=false;
+  for(var i=3;i<pixels.length;i+=4){if(pixels[i]>0){hasContent=true;break;}}
+  if(!hasContent)return null;
+  return canvas.toDataURL('image/png');
+}
+</script>
+</body>
+</html>
