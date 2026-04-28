@@ -6,7 +6,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-import os, io, base64, tempfile, subprocess
+import os, io, base64, tempfile
 from datetime import datetime
 import sendgrid
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
@@ -783,25 +783,16 @@ def make_civ(d, client_sig_path):
 
 
 def docx_to_pdf(docx_buf, base_name):
-    """Convert a docx buffer to PDF using LibreOffice and return PDF bytes."""
+    """Convert a docx buffer to PDF using docx2pdf and return PDF bytes."""
+    from docx2pdf import convert
     tmp_dir = tempfile.mkdtemp()
     docx_path = os.path.join(tmp_dir, base_name + '.docx')
     pdf_path = os.path.join(tmp_dir, base_name + '.pdf')
-    # Write docx to temp file
     with open(docx_path, 'wb') as f:
         f.write(docx_buf.read())
-    # Convert using LibreOffice headless
-    result = subprocess.run([
-        'libreoffice', '--headless', '--convert-to', 'pdf',
-        '--outdir', tmp_dir, docx_path
-    ], capture_output=True, text=True, timeout=60)
-    print('LibreOffice stdout:', result.stdout)
-    print('LibreOffice stderr:', result.stderr)
-    if not os.path.exists(pdf_path):
-        raise Exception('PDF conversion failed: ' + result.stderr)
+    convert(docx_path, pdf_path)
     with open(pdf_path, 'rb') as f:
         pdf_bytes = f.read()
-    # Cleanup
     os.unlink(docx_path)
     os.unlink(pdf_path)
     os.rmdir(tmp_dir)
