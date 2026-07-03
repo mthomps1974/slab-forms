@@ -8,8 +8,11 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import os, io, base64, tempfile
 from datetime import datetime
-import sendgrid
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -17,9 +20,9 @@ import matplotlib.pyplot as plt
 app = Flask(__name__)
 CORS(app)
 
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+GMAIL_ADDRESS = os.environ.get('smtp_USER', '')
+GMAIL_APP_PASSWORD = os.environ.get('smtp_pass', '')
 FIRM_EMAIL = os.environ.get('FIRM_EMAIL', 'info@tflaw.co.uk')
-FROM_EMAIL = os.environ.get('FROM_EMAIL', '')
 SOL_SIG_PATH = os.path.join(os.path.dirname(__file__), 'sol_sig.png')
 
 def v(d, key):
@@ -810,28 +813,27 @@ def send_email(d, aa_buf, civ_buf):
             'Both completed declaration documents are attached as PDFs.\n'
             'Please countersign and submit to SLAB via Legal Aid Online.')
 
-    message = Mail(
-        from_email=FROM_EMAIL,
-        to_emails=FIRM_EMAIL,
-        subject='New Legal Aid Declaration - ' + fname + ' ' + lname + ' - ' + ref,
-        plain_text_content=body
-    )
+    msg = MIMEMultipart()
+    msg['From'] = GMAIL_ADDRESS
+    msg['To'] = FIRM_EMAIL
+    msg['Subject'] = 'New Legal Aid Declaration - ' + fname + ' ' + lname + ' - ' + ref
+    msg.attach(MIMEText(body, 'plain'))
 
     for buf, filename in [
         (aa_buf, 'AA_LAO_CIV_' + lname + '_' + fname + '.docx'),
         (civ_buf, 'CIV_SOL_' + lname + '_' + fname + '.docx'),
     ]:
-        encoded = base64.b64encode(buf.read()).decode()
-        attachment = Attachment(
-            FileContent(encoded),
-            FileName(filename),
-            FileType('application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
-            Disposition('attachment')
-        )
-        message.attachment = attachment
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(buf.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', 'attachment; filename=' + filename)
+        msg.attach(part)
 
-    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
-    sg.send(message)
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+    server.send_message(msg)
+    server.quit()
 
 
 @app.route('/submit', methods=['POST'])
